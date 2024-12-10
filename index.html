@@ -83,7 +83,7 @@ function draw() {
     let Y_planet = Y_deferent + p.r * sin(Omega * t);
 
     positions[p.name].push({ x: X_planet, y: Y_planet });
-    if (positions[p.name].length > 100) { 
+    if (positions[p.name].length > 1000) { 
       positions[p.name].shift();
     }
 
