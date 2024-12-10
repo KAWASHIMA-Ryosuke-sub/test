@@ -2,79 +2,47 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>太陽系複数惑星同時表示(天動説モデル例)</title>
-  <!-- p5.jsをCDN経由で読み込み -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>太陽系複数惑星同時表示</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
   <style>
     body {
       font-family: sans-serif;
       margin: 0;
       overflow: hidden;
-    }
-    #controls {
-      margin: 10px;
-      position: absolute;
-      z-index: 100;
-    }
-    label {
-      margin-right: 10px;
+      touch-action: none; /* スクロール防止 */
     }
   </style>
 </head>
 <body>
-
-<div id="controls">
-  <label>
-    時間スケール:
-    <input type="number" id="timeScaleInput" value="1" step="1" />
-  </label>
-</div>
-
 <script>
+const scaleFactor = Math.min(windowWidth, windowHeight) / 800;
 const planets = [
-  { name: "水星",   synodic: 116, orbital: 88,    R:100, r:20, color:[200,200,0] },
-  { name: "金星",   synodic: 584, orbital: 224.7, R:150, r:30, color:[255,153,0] },
-  { name: "火星",   synodic: 780, orbital: 687,   R:200, r:50, color:[255,0,0] },
-  { name: "木星",   synodic: 399, orbital: 4332,  R:250, r:60, color:[153,102,0] },
-  { name: "土星",   synodic: 378, orbital: 10759, R:300, r:70, color:[204,204,0] },
-  { name: "天王星", synodic: 370, orbital: 30688, R:350, r:80, color:[0,255,255] },
-  { name: "海王星", synodic: 367, orbital:60190, R:400, r:90, color:[0,0,255] }
+  { name: "水星", synodic: 116, orbital: 88, R: 100 * scaleFactor, r: 20 * scaleFactor, color: [200, 200, 0] },
+  { name: "金星", synodic: 584, orbital: 224.7, R: 150 * scaleFactor, r: 30 * scaleFactor, color: [255, 153, 0] },
+  { name: "火星", synodic: 780, orbital: 687, R: 200 * scaleFactor, r: 50 * scaleFactor, color: [255, 0, 0] },
 ];
 
 let timeScale = 1;
 let t = 0;
-let positions = {};
 
 function setup() {
-  createCanvas(displayWidth * 0.9, displayHeight * 0.9); 
+  createCanvas(windowWidth, windowHeight); // スマホ画面全体を使用
   angleMode(RADIANS);
   frameRate(60);
-
-  for (let p of planets) {
-    positions[p.name] = [];
-  }
-  
-  const timeScaleInput = document.getElementById('timeScaleInput');
-  timeScaleInput.addEventListener('input', () => {
-    timeScale = parseFloat(timeScaleInput.value) || 1;
-    resetPositions();
-  });
 }
 
 function draw() {
   background(220);
-  translate(width / 2, height / 2);
+  translate(width / 2, height / 2); // 中心をキャンバス中央に設定
 
   fill(0, 0, 255);
   noStroke();
-  ellipse(0, 0, 12, 12);
+  ellipse(0, 0, 12, 12); // 地球の中心
 
   for (let p of planets) {
-    let omega_base = (2 * Math.PI) / p.synodic;
-    let Omega_base = (2 * Math.PI) / p.orbital;
-    let omega = omega_base * timeScale;
-    let Omega = Omega_base * timeScale;
+    let omega = (2 * Math.PI / p.synodic) * timeScale;
+    let Omega = (2 * Math.PI / p.orbital) * timeScale;
 
     let X_deferent = p.R * cos(omega * t);
     let Y_deferent = p.R * sin(omega * t);
@@ -82,42 +50,17 @@ function draw() {
     let X_planet = X_deferent + p.r * cos(Omega * t);
     let Y_planet = Y_deferent + p.r * sin(Omega * t);
 
-    positions[p.name].push({ x: X_planet, y: Y_planet });
-    if (positions[p.name].length > 1000) { 
-      positions[p.name].shift();
-    }
-
+    // 軌道の描画
     stroke(p.color[0], p.color[1], p.color[2]);
     noFill();
-    beginShape();
-    for (let pos of positions[p.name]) {
-      vertex(pos.x, pos.y);
-    }
-    endShape();
+    ellipse(0, 0, 2 * p.R, 2 * p.R); // 遅動円
 
-    stroke(100);
-    noFill();
-    ellipse(0, 0, 2 * p.R, 2 * p.R);
-    ellipse(X_deferent, Y_deferent, 2 * p.r, 2 * p.r);
-
+    // 惑星の描画
     fill(p.color[0], p.color[1], p.color[2]);
-    noStroke();
-    ellipse(X_planet, Y_planet, 10, 10);
+    ellipse(X_planet, Y_planet, 10, 10); // 惑星
   }
 
   t++;
-}
-
-function windowResized() {
-  resizeCanvas(displayWidth * 0.9, displayHeight * 0.9);
-  resetPositions();
-}
-
-function resetPositions() {
-  t = 0;
-  for (let p of planets) {
-    positions[p.name] = [];
-  }
 }
 </script>
 </body>
