@@ -77,7 +77,7 @@ function draw() {
 
     // 軌跡データの保存
     positions[p.name].push({ x: X_planet, y: Y_planet });
-    if (positions[p.name].length > 300) { // 負荷軽減のため古いデータを削除
+    if (positions[p.name].length > 1000) { // 負荷軽減のため古いデータを削除
       positions[p.name].shift();
     }
 
