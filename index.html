@@ -47,7 +47,7 @@ let t = 0;
 let positions = {};
 
 function setup() {
-  createCanvas(displayWidth * 0.9, displayHeight * 0.9); 
+  createCanvas(displayWidth * 0.5, displayHeight * 0.5); 
   angleMode(RADIANS);
   frameRate(60);
 
@@ -109,7 +109,7 @@ function draw() {
 }
 
 function windowResized() {
-  resizeCanvas(displayWidth * 0.5, displayHeight * 0.5);
+  resizeCanvas(displayWidth * 0.9, displayHeight * 0.9);
   resetPositions();
 }
 
