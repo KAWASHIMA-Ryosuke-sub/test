@@ -44,6 +44,7 @@ const planets = [
 ];
 
 let timeScale = 1;
+const maxHistory = 100; // 軌跡の最大保存数
 let t = 0;
 let positions = {};
 
@@ -85,7 +86,10 @@ function draw() {
     let X_planet = X_deferent + p.r * cos(Omega * t);
     let Y_planet = Y_deferent + p.r * sin(Omega * t);
     
-    positions[p.name].push({x: X_planet, y: Y_planet});
+    positions[p.name].push({ x: X_planet, y: Y_planet });
+    if (positions[p.name].length > maxHistory) {
+      positions[p.name].shift();
+    }
     
     // 軌跡描画
     stroke(p.color[0], p.color[1], p.color[2]);
@@ -115,7 +119,7 @@ function draw() {
 
 // ウィンドウサイズが変化した際にキャンバスサイズを再調整
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  createCanvas(displayWidth * 0.9, displayHeight * 0.9); // 画面の90%を利用
   resetPositions();
 }
 
