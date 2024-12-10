@@ -22,7 +22,7 @@
   </label>
 </div>
 <script>
-const scaleFactor = Math.min(windowWidth, windowHeight) / 800; // 基準スケール
+// 惑星データ：{synodic, orbital, R, r, color}
 const planets = [
   { name: "水星",   synodic: 116, orbital: 88,    R:100, r:20, color:[200,200,0] },
   { name: "金星",   synodic: 584, orbital: 224.7, R:150, r:30, color:[255,153,0] },
@@ -42,6 +42,7 @@ function setup() {
   angleMode(RADIANS);
   frameRate(60);
 
+  // 各惑星の軌跡を保存する配列を初期化
   for (let p of planets) {
     positions[p.name] = [];
   }
@@ -68,11 +69,11 @@ function draw() {
     let Omega = Omega_base * timeScale;
 
     // 惑星の位置計算
-    let X_deferent = p.R * scaleFactor * cos(omega * t);
-    let Y_deferent = p.R * scaleFactor * sin(omega * t);
+    let X_deferent = p.R * cos(omega * t);
+    let Y_deferent = p.R * sin(omega * t);
 
-    let X_planet = X_deferent + p.r * scaleFactor * cos(Omega * t);
-    let Y_planet = Y_deferent + p.r * scaleFactor * sin(Omega * t);
+    let X_planet = X_deferent + p.r * cos(Omega * t);
+    let Y_planet = Y_deferent + p.r * sin(Omega * t);
 
     // 軌跡データの保存
     positions[p.name].push({ x: X_planet, y: Y_planet });
@@ -92,10 +93,10 @@ function draw() {
     // 遅動円
     stroke(100);
     noFill();
-    ellipse(0, 0, 2 * p.R * scaleFactor, 2 * p.R * scaleFactor);
+    ellipse(0, 0, 2 * p.R, 2 * p.R);
 
     // 周転円
-    ellipse(X_deferent, Y_deferent, 2 * p.r * scaleFactor, 2 * p.r * scaleFactor);
+    ellipse(X_deferent, Y_deferent, 2 * p.r, 2 * p.r);
 
     // 惑星
     fill(p.color[0], p.color[1], p.color[2]);
