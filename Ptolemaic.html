@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>太陽系複数惑星同時表示(天動説モデル例)</title>
+<script src="https://cdn.jsdelivr.net/npm/p5@1.6.0/lib/p5.min.js"></script>
+<style>
+  body {
+    font-family: sans-serif;
+  }
+  #controls {
+    margin-bottom: 10px;
+  }
+  label {
+    margin-right: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div id="controls">
+  <label>
+    時間スケール:
+    <input type="number" id="timeScaleInput" value="1" step="1"/>
+  </label>
+</div>
+
+<script>
+// 惑星データ：{synodic, orbital, R, r, color}
+const planets = [
+  { name: "水星",   synodic: 116, orbital: 88,    R:100, r:20, color:[200,200,0] },
+  { name: "金星",   synodic: 584, orbital: 224.7, R:150, r:30, color:[255,153,0] },
+  { name: "火星",   synodic: 780, orbital: 687,   R:200, r:50, color:[255,0,0] },
+  { name: "木星",   synodic: 399, orbital: 4332,  R:250, r:60, color:[153,102,0] },
+  { name: "土星",   synodic: 378, orbital: 10759, R:300, r:70, color:[204,204,0] },
+  { name: "天王星", synodic: 370, orbital: 30688, R:350, r:80, color:[0,255,255] },
+  { name: "海王星", synodic: 367, orbital:60190, R:400, r:90, color:[0,0,255] }
+];
+
+let timeScale = 1;
+let t = 0;
+let positions = {};
+
+// ウィンドウサイズに合わせたい場合はこの関数を有効活用
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
+
+function setup() {
+  // 可変サイズにしたい場合
+  createCanvas(windowWidth, windowHeight);
+  // 固定サイズにしたい場合は上記行をコメントアウトして下記行を有効化
+  // createCanvas(800, 800);
+  
+  angleMode(RADIANS);
+  frameRate(60);
+
+  // positions初期化
+  for (let p of planets) {
+    positions[p.name] = [];
+  }
+  
+  const timeScaleInput = document.getElementById('timeScaleInput');
+  timeScaleInput.addEventListener('input', () => {
+    timeScale = parseFloat(timeScaleInput.value) || 1;
+    resetPositions();
+  });
+}
+
+function draw() {
+  background(220);
+  translate(width/2, height/2);
+
+  // 地球(中心)
+  fill(0,0,255);
+  noStroke();
+  ellipse(0,0,12,12);
+  
+  for (let p of planets) {
+    let omega_base = (2 * Math.PI) / p.synodic;
+    let Omega_base = (2 * Math.PI) / p.orbital;
+    let omega = omega_base * timeScale;
+    let Omega = Omega_base * timeScale;
+    
+    let X_deferent = p.R * cos(omega * t);
+    let Y_deferent = p.R * sin(omega * t);
+    
+    let X_planet = X_deferent + p.r * cos(Omega * t);
+    let Y_planet = Y_deferent + p.r * sin(Omega * t);
+    
+    positions[p.name].push({x: X_planet, y: Y_planet});
+    
+    // 軌跡描画
+    stroke(p.color[0], p.color[1], p.color[2]);
+    noFill();
+    beginShape();
+    for (let pos of positions[p.name]) {
+      vertex(pos.x, pos.y);
+    }
+    endShape();
+    
+    // 遅動円
+    stroke(100);
+    noFill();
+    ellipse(0, 0, 2*p.R, 2*p.R);
+    
+    // 周転円
+    ellipse(X_deferent, Y_deferent, 2*p.r, 2*p.r);
+    
+    // 惑星
+    fill(p.color[0], p.color[1], p.color[2]);
+    noStroke();
+    ellipse(X_planet, Y_planet, 10, 10);
+  }
+
+  t++;
+}
+
+function resetPositions() {
+  t = 0;
+  for (let p of planets) {
+    positions[p.name] = [];
+  }
+}
+</script>
+</body>
+</html>
